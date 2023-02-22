@@ -96,6 +96,7 @@ class WhatsAppInput(InputChannel):
         self.phone_number_id = phone_number_id
         self.verify_token = verify_token
         self.debug_mode = debug_mode
+        self.client = WhatsApp(self.auth_token, phone_number_id=self.phone_number_id)
 
     def blueprint(
         self, on_new_message: Callable[[UserMessage], Awaitable[Any]]
@@ -106,7 +107,7 @@ class WhatsAppInput(InputChannel):
         async def health(_: Request) -> HTTPResponse:
             return response.json({"status": "ok"})
 
-        @whatsapp_webhook.route("/webhooks", methods=["GET"])
+        @whatsapp_webhook.route("/webhook", methods=["GET"])
         async def verify_token(request: Request) -> HTTPResponse:
             print(request.args.get("hub.verify_token"))
             print(self.verify_token)
@@ -119,8 +120,10 @@ class WhatsAppInput(InputChannel):
 
         @whatsapp_webhook.route("/webhook", methods=["POST"])
         async def message(request: Request) -> HTTPResponse:
-            sender = WhatsApp.get_mobile(None, request)
-            text = WhatsApp.get_message(None, request) #TODO This will not work for image caption and buttons
+            logger.debug(request.json)
+            print(request.json)
+            sender = self.client.get_mobile(request.json)
+            text = self.client.get_message(request.json) #TODO This will not work for image caption and buttons
 
             out_channel = self.get_output_channel()
 
