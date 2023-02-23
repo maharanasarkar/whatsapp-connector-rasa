@@ -8,6 +8,17 @@ from rasa.core.channels.channel import InputChannel
 from rasa.core.channels.channel import UserMessage, OutputChannel
 
 from heyoo import WhatsApp
+from typing import (
+    Text,
+    List,
+    Dict,
+    Any,
+    Optional,
+    Callable,
+    Iterable,
+    Awaitable,
+    NoReturn,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -35,23 +46,25 @@ class WhatsAppOutput(WhatsApp, OutputChannel):
             self.send_message(message_part, recipient_id=recipient_id)
 
     async def send_text_with_buttons(
-        self, recipient_id: Text, text: Dict[Text, Any], **kwargs: Any
+        self,
+        recipient_id: Text,
+        text: Text,
+        buttons: List[Dict[Text, Any]],
+        **kwargs: Any,
     ) -> None:
         """Sends text message with buttons"""
-        body_text = text.get("text", "")
-
         buttons_list = []
-        for button in text["buttons"]:
+        for button in buttons:
             buttons_list.append({
                         "type": "reply",
                         "reply": {
                             "id": button.get("payload"),
-                            "title": button.get("text")
+                            "title": button.get("title")
                         }
                     })
 
         button_dict = {"type": "button", "body": {
-                "text": body_text},
+                "text": text},
                 "action": {
                     "buttons": buttons_list
                 }
@@ -97,7 +110,15 @@ class WhatsAppInput(InputChannel):
         self.verify_token = verify_token
         self.debug_mode = debug_mode
         self.client = WhatsApp(self.auth_token, phone_number_id=self.phone_number_id)
-
+    def get_message(self, data):
+        message_type = self.client.get_message_type(data)
+        if message_type == "interactive":
+            response = self.client.get_interactive_response(data)
+            
+            if response.get("type") == "button_reply":
+                return response.get("button_reply").get("id")
+        return self.client.get_message(data)
+    
     def blueprint(
         self, on_new_message: Callable[[UserMessage], Awaitable[Any]]
     ) -> Blueprint:
@@ -120,13 +141,14 @@ class WhatsAppInput(InputChannel):
 
         @whatsapp_webhook.route("/webhook", methods=["POST"])
         async def message(request: Request) -> HTTPResponse:
-            logger.debug(request.json)
-            print(request.json)
             sender = self.client.get_mobile(request.json)
-            text = self.client.get_message(request.json) #TODO This will not work for image caption and buttons
-
+            #logger.debug(request.json)
+            #text = self.client.get_message(request.json) #TODO This will not work for image caption and buttons
+            
+            text = self.get_message(request.json)
+            logger.debug(text)
+            
             out_channel = self.get_output_channel()
-
             if sender is not None and message is not None:
                 metadata = self.get_metadata(request)
                 try:
