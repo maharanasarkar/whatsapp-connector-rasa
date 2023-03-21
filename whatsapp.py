@@ -79,6 +79,29 @@ class WhatsAppOutput(WhatsApp, OutputChannel):
 
         self.send_image(image, recipient_id=recipient_id)
 
+    async def send_video_url(
+            self, recipient_id: Text, video: Text, **kwargs: Any
+    ) -> None:
+        """Sends a Video"""
+        self.send_video(video, recipient_id=recipient_id)
+
+    async def send_document_url(
+            self, recipient_id: Text, document: Text, **kwargs: Any
+    ) -> None:
+        """Sends a Document"""
+        self.send_document(document, recipient_id=recipient_id)
+
+    async def send_audio_url(
+            self, recipient_id: Text, audio: Text, **kwargs: Any
+    ) -> None:
+        """Sends an Audio"""
+        self.send_audio(audio, recipient_id=recipient_id)
+
+    async def send_location_url(
+            self, recipient_id: Text, location: Text, **kwargs: Any
+    ) -> None:
+        """Sends the Location"""
+        self.send_location(location, recipient_id=recipient_id)
 
 class WhatsAppInput(InputChannel):
     """WhatsApp Cloud API input channel"""
