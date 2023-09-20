@@ -1,4 +1,4 @@
-# Rasa Custom Connector - WhatsApp
+# Rasa Custom Channel Connector - WhatsApp
 
 This repository contains a custom channel connector for Rasa which is going to connect a rasa chatbot to whatsapp.
 
@@ -6,11 +6,11 @@ This repository contains a custom channel connector for Rasa which is going to c
 This repository contains a custom channel connector for Rasa Open Source that enables you to connect your Rasa chatbot to WhatsApp, one of the most popular messaging platforms worldwide. With this custom connector, you can interact with your Rasa chatbot through WhatsApp, providing a seamless conversational experience to your users.
 
 ## Features
-- WhatsApp Integration: Connect your Rasa chatbot to WhatsApp and leverage its vast user base.
-- Two-way Messaging: Send and receive messages between your Rasa bot and WhatsApp users.
-- Interactive Conversations: Engage users in interactive conversations via WhatsApp.
-- Message Attachments: Share images, files, and other attachments with your chatbot.
-- Configurable: Easily configure the connector to work with your WhatsApp account.
+- **WhatsApp Integration**: Connect your Rasa chatbot to WhatsApp and leverage its vast user base.
+- **Two-way Messaging**: Send and receive messages between your Rasa bot and WhatsApp users.
+- **Interactive Conversations**: Engage users in interactive conversations via WhatsApp.
+- **Message Attachments**: Share images, files, and other attachments with your chatbot.
+- **Configurable**: Easily configure the connector to work with your WhatsApp account.
 
 ## Prerequisites
 Before you get started, make sure you have the following prerequisites in place:
@@ -26,8 +26,14 @@ git clone https://github.com/maharanasarkar/rasa-whatsapp_connector.git
 ```
 Make sure git is installed locally on your PC.
 
-2. Configure the connector by editing the config.yml file. You'll need to provide your WhatsApp Business Account details, including your phone number and authentication credentials.
-
+2. Configure the connector by editing the `config.yml` file. You'll need to provide your WhatsApp Business Account details, including your phone number and authentication credentials.
+3. Integrate the connector into your Rasa chatbot's configuration by including it in your `endpoints.yml` file:
+```
+custom_whatsapp_connector.CustomWhatsAppInput:
+  webhook_url: "http://localhost:5056/webhook"
+```
+Replace the webhook_url with the appropriate endpoint where your WhatsApp connector is running.
+4. Run your Rasa chatbot and start communicating with it through WhatsApp.
 ## Usage
 Once your Rasa chatbot is connected to WhatsApp, users can initiate conversations with your bot on WhatsApp. Your bot can respond to user messages and engage in interactive dialogues.
 
