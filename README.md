@@ -1,7 +1,5 @@
 # Rasa Custom Channel Connector - WhatsApp
 
-This repository contains a custom channel connector for Rasa which is going to connect a rasa chatbot to whatsapp.
-
 ##  Overview
 This repository contains a custom channel connector for Rasa Open Source that enables you to connect your Rasa chatbot to WhatsApp, one of the most popular messaging platforms worldwide. With this custom connector, you can interact with your Rasa chatbot through WhatsApp, providing a seamless conversational experience to your users.
 
