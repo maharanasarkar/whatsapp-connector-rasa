@@ -30,8 +30,15 @@ Make sure git is installed locally on your PC.
 custom_whatsapp_connector.CustomWhatsAppInput:
   webhook_url: "http://localhost:5056/webhook"
 ```
+4. Edit the `credentials.yml` file and add the WhatsApp Token( You need to setup Meta Business account and get the WhatsApp business API from Meta Developers Page) as shown below :
+```
+whatsapp:
+  auth_token: ""
+  phone_number_id: ""
+  verify_token: "" 
+```
 Replace the webhook_url with the appropriate endpoint where your WhatsApp connector is running.
-4. Run your Rasa chatbot and start communicating with it through WhatsApp.
+5. Run your Rasa chatbot and start communicating with it through WhatsApp.
 ## Usage
 Once your Rasa chatbot is connected to WhatsApp, users can initiate conversations with your bot on WhatsApp. Your bot can respond to user messages and engage in interactive dialogues.
 
