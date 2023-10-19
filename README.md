@@ -24,7 +24,7 @@ git clone https://github.com/maharanasarkar/rasa-whatsapp_connector.git
 ```
 Make sure git is installed locally on your PC.
 
-2. Configure the connector by editing the `config.yml` file. You'll need to provide your WhatsApp Business Account details, including your phone number and authentication credentials.
+2. Configure the connector by editing the `credentials.yml` file. You'll need to provide your WhatsApp Business Account details, including your phone number and authentication credentials.
 3. Integrate the connector into your Rasa chatbot's configuration by including it in your `endpoints.yml` file:
 ```
 custom_whatsapp_connector.CustomWhatsAppInput:
