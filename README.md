@@ -38,6 +38,7 @@ whatsapp:
   verify_token: "" 
 ```
 Replace the webhook_url with the appropriate endpoint where your WhatsApp connector is running.
+
 5. Run your Rasa chatbot and start communicating with it through WhatsApp.
 ## Usage
 Once your Rasa chatbot is connected to WhatsApp, users can initiate conversations with your bot on WhatsApp. Your bot can respond to user messages and engage in interactive dialogues.
