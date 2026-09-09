@@ -32,11 +32,14 @@ custom_whatsapp_connector.CustomWhatsAppInput:
 ```
 4. Edit the `credentials.yml` file and add the WhatsApp Token( You need to setup Meta Business account and get the WhatsApp business API from Meta Developers Page) as shown below :
 ```
-whatsapp:
-  auth_token: ""
+whatsapp.WhatsAppInput:
+  access_token: ""
   phone_number_id: ""
-  verify_token: "" 
+  verify_token: ""
+  app_secret: ""
+  graph_api_version: "latest"
 ```
+`auth_token` is still accepted as an alias for `access_token`. Set `app_secret` to enable `X-Hub-Signature-256` verification. Install the SDK with `pip install -r requirements.txt` (uses your own `whatsloon>=3.0.0`).
 Replace the webhook_url with the appropriate endpoint where your WhatsApp connector is running.
 
 5. Run your Rasa chatbot and start communicating with it through WhatsApp.
