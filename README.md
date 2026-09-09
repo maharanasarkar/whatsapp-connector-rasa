@@ -1,64 +1,120 @@
-# Rasa Custom Channel Connector - WhatsApp
+# Rasa Custom Channel Connector — WhatsApp
 
-##  Overview
-This repository contains a custom channel connector for Rasa Open Source that enables you to connect your Rasa chatbot to WhatsApp, one of the most popular messaging platforms worldwide. With this custom connector, you can interact with your Rasa chatbot through WhatsApp, providing a seamless conversational experience to your users.
+A Rasa Open Source custom channel built on your own
+[whatsloon](https://github.com/maharanasarkar/whatsloon) SDK
+(`whatsloon>=3.0.0`, modern v3 client) for the WhatsApp Cloud API.
+Chat with your Rasa assistant directly from WhatsApp.
 
 ## Features
-- **WhatsApp Integration**: Connect your Rasa chatbot to WhatsApp and leverage its vast user base.
-- **Two-way Messaging**: Send and receive messages between your Rasa bot and WhatsApp users.
-- **Interactive Conversations**: Engage users in interactive conversations via WhatsApp.
-- **Message Attachments**: Share images, files, and other attachments with your chatbot.
-- **Configurable**: Easily configure the connector to work with your WhatsApp account.
+
+- **Two-way messaging** via the WhatsApp Cloud API (`graph.facebook.com`).
+- **Text** with automatic chunking to Meta's 4096-character limit.
+- **Interactive reply buttons** (up to 3 per message; extras fall back to a
+  numbered list; titles truncated to Meta's 20-character limit).
+- **Media**: images, video, audio, documents by URL, with optional captions.
+- **Templates and locations** via `send_custom_json` (see below).
+- **Inbound**: text, button/list replies (payload routed as user text), media
+  captions, locations. Delivery statuses and unknown events are ignored.
+- **Webhook security**: `hub.verify_token` handshake plus optional
+  `X-Hub-Signature-256` HMAC verification via `app_secret` (fail-closed).
 
 ## Prerequisites
-Before you get started, make sure you have the following prerequisites in place:
 
-- A WhatsApp Business Account: You need a WhatsApp Business Account to connect your chatbot to WhatsApp. Follow WhatsApp's guidelines to set up an account.
+- Python 3.9+
+- A Rasa Open Source project (uses the `rasa.core.channels` custom-channel API).
+- A WhatsApp Business Account with a Meta app: **access token**,
+  **phone number ID**, and a **verify token** you choose for the webhook.
+- A public HTTPS URL for the webhook during development (e.g. via ngrok).
 
 ## Installation
-To use this custom WhatsApp channel connector with your Rasa chatbot, follow these steps:
 
-1. Clone this repository to your local machine:
-```
-git clone https://github.com/maharanasarkar/rasa-whatsapp_connector.git
-```
-Make sure git is installed locally on your PC.
+1. Clone this repository (or copy `whatsapp.py` into your Rasa project so it
+   is importable, e.g. the project root):
+   ```
+   git clone https://github.com/maharanasarkar/rasa-whatsapp_connector.git
+   ```
+2. Install the SDK:
+   ```
+   pip install -r requirements.txt
+   ```
+3. Add the channel to your Rasa `credentials.yml` (copy from
+   `credentials.yml.example`):
+   ```
+   whatsapp.WhatsAppInput:
+     access_token: "<WHATSAPP_ACCESS_TOKEN>"
+     phone_number_id: "<PHONE_NUMBER_ID>"
+     verify_token: "<VERIFY_TOKEN>"
+     app_secret: ""
+     graph_api_version: "latest"
+   ```
+   If `whatsapp.py` lives in a package, prefix the module path accordingly
+   (e.g. `channels.whatsapp.WhatsAppInput`).
 
-2. Configure the connector by editing the `credentials.yml` file. You'll need to provide your WhatsApp Business Account details, including your phone number and authentication credentials.
-3. Integrate the connector into your Rasa chatbot's configuration by including it in your `endpoints.yml` file:
-```
-custom_whatsapp_connector.CustomWhatsAppInput:
-  webhook_url: "http://localhost:5056/webhook"
-```
-4. Edit the `credentials.yml` file and add the WhatsApp Token( You need to setup Meta Business account and get the WhatsApp business API from Meta Developers Page) as shown below :
-```
-whatsapp.WhatsAppInput:
-  access_token: ""
-  phone_number_id: ""
-  verify_token: ""
-  app_secret: ""
-  graph_api_version: "latest"
-```
-`auth_token` is still accepted as an alias for `access_token`. Set `app_secret` to enable `X-Hub-Signature-256` verification. Install the SDK with `pip install -r requirements.txt` (uses your own `whatsloon>=3.0.0`).
-Replace the webhook_url with the appropriate endpoint where your WhatsApp connector is running.
+### Configuration reference
 
-5. Run your Rasa chatbot and start communicating with it through WhatsApp.
-## Usage
-Once your Rasa chatbot is connected to WhatsApp, users can initiate conversations with your bot on WhatsApp. Your bot can respond to user messages and engage in interactive dialogues.
+| Key | Required | Description |
+|---|---|---|
+| `access_token` | yes | Meta WhatsApp access token (`auth_token` accepted as alias). |
+| `phone_number_id` | yes | Sender phone number ID from the Meta app dashboard. |
+| `verify_token` | yes | Token Meta must echo during webhook subscription. |
+| `app_secret` | no | Meta app secret; enables HMAC signature checks on webhooks. |
+| `graph_api_version` | no | Pinned version or `"latest"` (default). |
+| `debug_mode` | no | Re-raise handler errors instead of logging them (default `true`). |
 
-Please note that WhatsApp's policies and terms of service apply when using this connector. Ensure your bot complies with WhatsApp's guidelines.
+4. In the Meta app dashboard, subscribe the webhook to callback URL
+   `https://<your-host>/webhooks/whatsapp/webhook` using your verify token,
+   and subscribe to the `messages` field.
+5. Run Rasa and talk to the bot on WhatsApp:
+   ```
+   rasa run
+   ```
+
+## Sending rich messages from Rasa
+
+Buttons work out of the box with standard Rasa responses. For templates or
+locations, use a custom JSON payload:
+
+```
+- custom:
+    template:
+      name: "hello_world"
+      language: "en_US"
+```
+
+```
+- custom:
+    location:
+      latitude: 28.6139
+      longitude: 77.2090
+      name: "New Delhi"
+```
+
+Inbound messages carry `metadata` with `message_id`, `message_type`, and
+`timestamp` for use in custom actions or trackers.
+
+## Testing
+
+```
+python -m pytest -q
+```
+
+The suite covers inbound text extraction (text, button/list replies, media
+captions, locations), chunking limits, handshake rejection, and webhook
+envelope parsing. Rasa and Sanic are stubbed in tests (runtime-only
+dependencies); run a live `rasa run` + webhook test before release.
+
+## Migrating from heyoo
+
+This connector previously used the `heyoo` package. It now uses `whatsloon`
+exclusively — remove `heyoo` from your environment. `auth_token` in existing
+`credentials.yml` files keeps working as an alias for `access_token`.
 
 ## Contributing
 
-We welcome contributions from the community to enhance and maintain this custom WhatsApp channel connector for Rasa Open Source. If you'd like to contribute, please follow these steps:
+- Fork, create a feature branch, add/extend tests in `tests/`.
+- Run `python -m pytest -q` and `python -m ruff check whatsapp.py tests/ --select I,BLE`.
+- Open a pull request describing behavior change, verification, and risks.
 
-- Fork this repository to your own GitHub account.
-- Create a new branch with a descriptive name for your feature or bug fix.
-- Make your changes and test them thoroughly.
-- Create a pull request (PR) to merge your changes into the main branch of this repository.
-- Include clear documentation and explanations of the changes made in your PR.
+## License
 
-## Contact
-If you have any questions or need assistance, please feel free to open an issue in this repository.
-
-Enjoy connecting your Rasa chatbot to WhatsApp and building conversational experiences! 
+MIT — see [LICENSE](LICENSE).
